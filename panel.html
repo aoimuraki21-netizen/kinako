@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>きなこ 名前の承認パネル</title>
+<style>
+:root{--bg:#f3efe7;--card:#fffdf8;--ink:#2b2420;--sub:#6f6358;--line:#e2d8c8;--ok:#2f8f46;--ng:#b8443a;--accent:#b77b47;--accent-ink:#fff;--soft:#f1e6d6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--card:#221c17;--ink:#f1e9df;--sub:#b3a493;--line:#3a3028;--soft:#2e261f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17130f;--card:#221c17;--ink:#f1e9df;--sub:#b3a493;--line:#3a3028;--soft:#2e261f;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.6}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.3rem;margin:0 0 4px}
+.lead{margin:0 0 16px;color:var(--sub);font-size:.9rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:999px;color:#fff;background:#888}
+.chip.ok{background:var(--ok)}.chip.ng{background:var(--ng)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
+.card h2{font-size:1rem;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.count{font-size:.8rem;color:var(--sub);font-weight:400}
+.url{display:flex;gap:8px}
+.url input{flex:1;min-width:0;font:inherit;font-size:.85rem;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink)}
+button{font:inherit;font-weight:700;font-size:.85rem;border-radius:10px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--soft);color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible{outline:3px solid #f3cd5e;outline-offset:2px}
+.note{font-size:.8rem;color:var(--sub);margin:8px 0 0}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px dashed var(--line)}
+li:first-child{border-top:0}
+.name{flex:1;min-width:0;font-weight:700;word-break:break-all}
+.uid{display:block;font-weight:400;font-size:.75rem;color:var(--sub)}
+.empty{color:var(--sub);font-size:.9rem;padding:6px 0}
+details summary{cursor:pointer;font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.set{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
+.set:first-of-type{border-top:0}
+.set label{font-weight:700;font-size:.9rem}
+.set .val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.set input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.set .hint{grid-column:1/-1;font-size:.78rem;color:var(--sub)}
+.set input[type=text]{grid-column:1/-1;font:inherit;font-size:.85rem;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink)}
+.sw{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem}
+.sw input{width:20px;height:20px;accent-color:var(--accent)}
+button.danger{color:var(--ng)}
+</style>
+</head>
+<body>
+<main>
+<h1>名前の承認パネル</h1>
+<p class="lead">ギフトを送った人の名前を確認して、「承認」した人だけ犬に名前が表示されます。配信するPCのブラウザで開いたままにしてください。</p>
+
+<div class="chips">
+  <span class="chip" id="c-tik">TikFinity：接続待ち</span>
+  <span class="chip" id="c-send">送信：待機中</span>
+</div>
+
+<section class="card">
+  <h2>LIVE Studio のリンクソースに入れるURL</h2>
+  <div class="url"><input id="ourl" readonly><button id="copy">コピー</button></div>
+  <p class="note">このURLは合言葉の代わりです。ほかの人には教えないでください。サイズ調整などは末尾に「&amp;size=2」のようにつなげます。</p>
+</section>
+
+
+<section class="card">
+  <h2>ゲーム設定 <span class="count" id="cfg-state">変更はすぐ反映されます</span></h2>
+  <div class="set"><label for="hpSec">HPが0になるまでの時間</label><span class="val" id="v-hpSec"></span><input type="range" id="hpSec" min="10" max="600" step="5"></div>
+  <div class="set"><label for="feedPct">おやつの回復量</label><span class="val" id="v-feedPct"></span><input type="range" id="feedPct" min="10" max="100" step="5"></div>
+  <div class="set"><label for="maxDogs">犬の最大数</label><span class="val" id="v-maxDogs"></span><input type="range" id="maxDogs" min="1" max="15" step="1"><span class="hint">減らすと、HPの少ない犬から犬小屋へ帰ります。</span></div>
+  <div class="set"><label for="size">犬の大きさ</label><span class="val" id="v-size"></span><input type="range" id="size" min="0.5" max="3" step="0.1"></div>
+  <div class="set"><label for="walk">歩くはやさ</label><span class="val" id="v-walk"></span><input type="range" id="walk" min="0" max="4" step="0.5"><span class="hint">0にすると、犬はその場から動きません。</span></div>
+  <div class="set"><label for="crySec">泣いている時間</label><span class="val" id="v-crySec"></span><input type="range" id="crySec" min="0" max="6" step="0.5"></div>
+  <div class="set"><label for="homeSpeed">帰るはやさ</label><span class="val" id="v-homeSpeed"></span><input type="range" id="homeSpeed" min="1" max="8" step="1"></div>
+  <div class="set"><label for="spawn">犬が出てくるギフト</label><span></span><input type="text" id="spawn"><span class="hint">ギフト名をカンマ区切りで書きます（例：heart me, ハートミー, rose）。大文字小文字は区別しません。</span></div>
+  <div class="set"><span class="sw"><input type="checkbox" id="feedAny"><label for="feedAny">ほかのギフトでもおやつにする</label></span></div>
+  <div class="set"><span class="sw"><input type="checkbox" id="showBar"><label for="showBar">HPバーを表示</label></span></div>
+  <div class="set"><span class="sw"><input type="checkbox" id="showNames"><label for="showNames">名前を表示</label></span></div>
+  <div class="set"><span class="sw"><input type="checkbox" id="paused"><label for="paused">HPの減りを一時停止</label></span></div>
+  <div class="row" style="margin-top:8px"><button id="cfg-resend">設定を送り直す</button><button id="cfg-default">初期設定に戻す</button></div>
+</section>
+
+<section class="card">
+  <h2>いますぐ操作</h2>
+  <div class="row">
+    <button id="a-feed" class="primary">全員におやつ</button>
+    <button id="a-home">全員を犬小屋へ帰す</button>
+    <button id="a-reset" class="danger">全頭リセット</button>
+  </div>
+  <p class="note">「全頭リセット」は泣かずに一瞬で全員いなくなります。もう一度押して確定します。</p>
+</section>
+
+<section class="card">
+  <h2><span>承認待ち <span class="count" id="n-pending"></span></span><button id="bulk" class="primary">まとめて承認</button></h2>
+  <ul id="pending"></ul>
+</section>
+
+<section class="card">
+  <details>
+    <summary>承認済み <span class="count" id="n-approved"></span></summary>
+    <ul id="approved" style="margin-top:8px"></ul>
+  </details>
+</section>
+
+<section class="card">
+  <details>
+    <summary>非表示にした人 <span class="count" id="n-rejected"></span></summary>
+    <ul id="rejected" style="margin-top:8px"></ul>
+  </details>
+</section>
+
+<section class="card">
+  <h2>そのほか</h2>
+  <div class="row">
+    <button id="resend">承認済みを全員送り直す</button>
+    <button id="test">テスト用の名前を追加</button>
+    <button id="newroom">URLを作り直す</button>
+  </div>
+  <p class="note">「送り直す」は、配信画面で名前が出ないときに押してください。「URLを作り直す」を押すと、LIVE Studio のURLも新しいものに差し替える必要があります。</p>
+</section>
+</main>
+
+<script>
+(function(){
+const KEY='kinako-panel-v1';
+const WS_URL=new URLSearchParams(location.search).get('ws')||'ws://localhost:21213/';
+function newRoom(){const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,b=>'abcdefghijklmnopqrstuvwxyz0123456789'[b%36]).join('');}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){S=null;}
+if(!S||!S.room)S={room:newRoom(),approved:{},rejected:{},seen:{}};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+save();
+
+const $=id=>document.getElementById(id);
+function overlayURL(){const base=location.href.split('?')[0].split('#')[0].replace(/panel\.html$/,'');return base+'?room='+S.room;}
+$('ourl').value=overlayURL();
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('ourl').value);$('copy').textContent='コピーしました';}catch(e){$('ourl').select();document.execCommand&&document.execCommand('copy');$('copy').textContent='コピーしました';}setTimeout(()=>$('copy').textContent='コピー',1500);};
+
+const sendChip=$('c-send');
+let queue=Promise.resolve();
+function publish(m){
+ queue=queue.then(()=>fetch('https://ntfy.sh/kinako-'+S.room,{method:'POST',body:JSON.stringify(m)})
+  .then(r=>{if(!r.ok)throw new Error(r.status);sendChip.textContent='送信：OK';sendChip.className='chip ok';})
+  .catch(()=>{sendChip.textContent='送信：失敗（ネット接続を確認）';sendChip.className='chip ng';}));
+ return queue;
+}
+
+function approve(id){const v=S.seen[id];if(!v)return;S.approved[id]=v.nick;delete S.rejected[id];save();publish({t:'approve',id,nick:v.nick});render();}
+function reject(id){const v=S.seen[id];if(!v)return;S.rejected[id]=v.nick;if(S.approved[id]){delete S.approved[id];publish({t:'revoke',id});}save();render();}
+function revoke(id){const nick=S.approved[id];delete S.approved[id];S.rejected[id]=nick;save();publish({t:'revoke',id});render();}
+function restore(id){delete S.rejected[id];save();render();}
+
+function item(nick,id,buttons){
+ const li=document.createElement('li');
+ const n=document.createElement('span');n.className='name';n.textContent=nick;
+ const u=document.createElement('span');u.className='uid';u.textContent='@'+id;n.append(u);li.append(n);
+ for(const [label,cls,fn] of buttons){const b=document.createElement('button');b.textContent=label;if(cls)b.className=cls;b.onclick=fn;li.append(b);}
+ return li;
+}
+function fill(ul,list,empty){ul.innerHTML='';if(!list.length){const e=document.createElement('li');e.className='empty';e.textContent=empty;ul.append(e);}else list.forEach(li=>ul.append(li));}
+function render(){
+ const pend=Object.entries(S.seen).filter(([id,v])=>S.approved[id]!==v.nick&&S.rejected[id]!==v.nick).sort((a,b)=>b[1].t-a[1].t);
+ fill($('pending'),pend.map(([id,v])=>item(v.nick,id,[['承認','primary',()=>approve(id)],['非表示','',()=>reject(id)]])),'承認待ちの人はいません');
+ $('n-pending').textContent=pend.length+'人';
+ const ap=Object.entries(S.approved);
+ fill($('approved'),ap.map(([id,nick])=>item(nick,id,[['取り消し','',()=>revoke(id)]])),'まだいません');
+ $('n-approved').textContent=ap.length+'人';
+ const rj=Object.entries(S.rejected);
+ fill($('rejected'),rj.map(([id,nick])=>item(nick,id,[['承認待ちに戻す','',()=>restore(id)]])),'いません');
+ $('n-rejected').textContent=rj.length+'人';
+ document.title=(pend.length?'('+pend.length+') ':'')+'名前の承認パネル';
+}
+
+function seen(id,nick){
+ id=String(id||'');if(!id)return;nick=String(nick||id).slice(0,12);
+ S.seen[id]={nick,t:Date.now()};
+ const ids=Object.keys(S.seen);
+ if(ids.length>300){ids.sort((a,b)=>S.seen[a].t-S.seen[b].t).slice(0,ids.length-300).forEach(k=>{if(!S.approved[k]&&!S.rejected[k])delete S.seen[k];});}
+ save();render();
+}
+
+const tik=$('c-tik');let retry=1000;
+function connect(){
+ let ws;
+ try{ws=new WebSocket(WS_URL);}catch(e){tik.textContent='TikFinity：接続できません';tik.className='chip ng';setTimeout(connect,retry);return;}
+ ws.onopen=()=>{retry=1000;tik.textContent='TikFinity：接続中';tik.className='chip ok';};
+ ws.onmessage=ev=>{
+  let m;try{m=JSON.parse(ev.data);}catch(e){return;}
+  if(!m||(m.event||m.type)!=='gift')return;
+  const d=m.data||{},u=d.user||{};
+  const id=u.uniqueId||d.uniqueId||u.userId||d.userId||u.nickname||d.nickname;
+  seen(id,u.nickname||d.nickname||id);
+ };
+ ws.onclose=()=>{tik.textContent='TikFinity：再接続中…';tik.className='chip ng';setTimeout(connect,retry);retry=Math.min(retry*2,10000);};
+ ws.onerror=()=>{try{ws.close();}catch(e){}};
+}
+
+$('resend').onclick=async()=>{for(const [id,nick] of Object.entries(S.approved)){await publish({t:'approve',id,nick});}};
+let tn=0;$('test').onclick=()=>{tn++;seen('test-'+tn,'テスト'+tn);};
+let armed=0;$('newroom').onclick=()=>{
+ if(Date.now()-armed<3000){S.room=newRoom();save();$('ourl').value=overlayURL();$('newroom').textContent='URLを作り直す';armed=0;
+  for(const [id,nick] of Object.entries(S.approved))publish({t:'approve',id,nick});}
+ else{armed=Date.now();$('newroom').textContent='もう一度押すと作り直します';setTimeout(()=>{if(Date.now()-armed>=2900)$('newroom').textContent='URLを作り直す';},3000);}
+};
+
+const DEFAULT_CFG={hpSec:60,maxDogs:15,size:1,walk:1,homeSpeed:3,crySec:2,feedPct:100,feedAny:true,spawn:['heart me','ハートミー'],showBar:true,showNames:true,paused:false};
+if(!S.cfg)S.cfg={...DEFAULT_CFG};
+const RANGES={hpSec:v=>v+'秒',feedPct:v=>(v>=100?'全回復':v+'%'),maxDogs:v=>v+'匹',size:v=>'×'+(+v).toFixed(1),walk:v=>(+v===0?'止まる':'×'+v),crySec:v=>v+'秒',homeSpeed:v=>'×'+v};
+const CHECKS=['feedAny','showBar','showNames','paused'];
+function fillCfg(){
+ for(const k in RANGES){$(k).value=S.cfg[k];$('v-'+k).textContent=RANGES[k](S.cfg[k]);}
+ for(const k of CHECKS)$(k).checked=!!S.cfg[k];
+ $('spawn').value=(S.cfg.spawn||[]).join(', ');
+}
+let cfgTimer=0;
+function sendCfg(){clearTimeout(cfgTimer);$('cfg-state').textContent='送信中…';cfgTimer=setTimeout(()=>{publish({t:'config',cfg:S.cfg}).then(()=>{$('cfg-state').textContent='反映しました';});},350);}
+for(const k in RANGES){$(k).addEventListener('input',()=>{S.cfg[k]=+$(k).value;$('v-'+k).textContent=RANGES[k](S.cfg[k]);save();sendCfg();});}
+for(const k of CHECKS){$(k).addEventListener('change',()=>{S.cfg[k]=$(k).checked;save();sendCfg();});}
+$('spawn').addEventListener('change',()=>{S.cfg.spawn=$('spawn').value.split(/[,、，]/).map(v=>v.trim()).filter(Boolean);save();sendCfg();});
+$('cfg-resend').onclick=()=>sendCfg();
+$('cfg-default').onclick=()=>{S.cfg={...DEFAULT_CFG};save();fillCfg();sendCfg();};
+function act(a){publish({t:'action',a,ts:Date.now()});}
+$('a-feed').onclick=()=>act('feedAll');
+$('a-home').onclick=()=>act('homeAll');
+let rArm=0;$('a-reset').onclick=()=>{if(Date.now()-rArm<3000){act('reset');rArm=0;$('a-reset').textContent='全頭リセット';}else{rArm=Date.now();$('a-reset').textContent='もう一度押すとリセット';setTimeout(()=>{if(Date.now()-rArm>=2900)$('a-reset').textContent='全頭リセット';},3000);}};
+$('bulk').onclick=()=>{
+ const pend=Object.entries(S.seen).filter(([id,v])=>S.approved[id]!==v.nick&&S.rejected[id]!==v.nick);
+ for(const [id] of pend)approve(id);
+};
+fillCfg();
+
+render();connect();
+})();
+</script>
+</body>
+</html>
