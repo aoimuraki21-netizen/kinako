@@ -176,7 +176,7 @@ function tick(){
 function resize(){
  const dpr=window.devicePixelRatio||1;
  const cw=Math.max(1,window.innerWidth),ch=Math.max(1,window.innerHeight);
- let cssS=Math.max(1.5,cw/316*cfg.size);
+ let cssS=Math.max(1.5,cw/210*cfg.size);
  cssS=Math.min(cssS,ch/20);
  W=Math.max(40,Math.floor(cw/cssS));H=Math.max(20,Math.floor(ch/cssS));G=H-1;
  HOUSE_X=W-15;ROAM_MAX=Math.max(0,W-36);
